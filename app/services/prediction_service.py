@@ -1,16 +1,11 @@
-from src.config import RAW_DATA_DIR
 import pandas as pd
 import logging
 
-from app.core import pipeline
+from app.core import pipeline, stores
 from app.schemas import PredictionRequest
 from app.exceptions import StoreNotFoundError
 
 logger = logging.getLogger(__name__)
-
-stores = pd.read_csv(RAW_DATA_DIR / "store.csv")
-
-logger.info("Store metadata loaded successfully")
 
 def _rename_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df.rename(
