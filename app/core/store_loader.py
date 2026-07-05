@@ -1,4 +1,4 @@
-from src import RAW_DATA_DIR
+from common import RAW_DATA_DIR
 import logging
 import pandas as pd
 

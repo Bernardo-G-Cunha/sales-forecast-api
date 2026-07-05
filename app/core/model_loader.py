@@ -1,4 +1,4 @@
-from src import MODEL_DIR
+from common import MODEL_DIR
 import joblib
 import logging
 
