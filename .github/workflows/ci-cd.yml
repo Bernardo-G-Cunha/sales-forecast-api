@@ -9,8 +9,12 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: sales-forecast-api-artifacts-bernardo
+
 jobs:
-  test:
+  pipeline:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +25,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::784038766309:role/SalesForecastGitHubRole
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -34,10 +38,9 @@ jobs:
           pip install -r requirements-dev.txt
           pip install -e .
 
-      - name: Set environment variables
-        run: |
-          echo "S3_BUCKET=sales-forecast-api-artifacts-bernardo" >> $GITHUB_ENV
-          echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
-            
       - name: Run tests
         run: pytest
+
+      - name: Build Docker image
+        run: |
+          docker build -t sales-forecast-api .
