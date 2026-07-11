@@ -1,7 +1,7 @@
 import pandas as pd
 import logging
 
-from app.core import pipeline, stores
+from app.core import artifacts
 from app.schemas import PredictionRequest
 from app.exceptions import StoreNotFoundError
 
@@ -38,7 +38,7 @@ def _create_calendar_features(df: pd.DataFrame) -> pd.DataFrame:
 def _merge_store_metadata(df: pd.DataFrame) -> pd.DataFrame:
 
     merged = df.merge(
-        stores,
+        artifacts.stores,
         on="Store",
         how="left",
     )
@@ -64,7 +64,7 @@ def predict(request: PredictionRequest) -> float:
     df = _merge_store_metadata(df)
     df = _create_calendar_features(df)
     
-    prediction = pipeline.predict(df)
+    prediction = artifacts.pipeline.predict(df)
     
     logger.info(
         "Prediction completed for store=%s with predicted_sales=%.2f",

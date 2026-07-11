@@ -1,7 +1,6 @@
-from .model_loader import pipeline
-from .store_loader import stores
+from .artifacts import load_pipeline, load_stores
 
 __all__ = [
-    "pipeline",
-    "stores"
+    "load_pipeline",
+    "load_stores"
 ]
