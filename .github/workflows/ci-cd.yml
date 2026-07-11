@@ -12,6 +12,7 @@ permissions:
 env:
   AWS_REGION: us-east-1
   S3_BUCKET: sales-forecast-api-artifacts-bernardo
+  ECR_REPOSITORY: portfolio/sales-forecast-api
 
 jobs:
   pipeline:
@@ -43,4 +44,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t sales-forecast-api .
+          docker build -t ${{ env.ECR_REPOSITORY }} .
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
