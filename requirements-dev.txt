@@ -1,0 +1,6 @@
+-r requirements-api.txt
+
+xgboost==3.3.0
+matplotlib==3.11.0
+pytest==9.1.1
+httpx2==2.5.0
