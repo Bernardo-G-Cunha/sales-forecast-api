@@ -33,5 +33,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
+      - name: Show repository
+        run: |
+          pwd
+          ls -la
+          find . -maxdepth 2 -type d
+
+      - name: Show Python path
+        run: |
+          python -c "import sys; print('\n'.join(sys.path))"
+            
       - name: Run tests
         run: pytest
