@@ -1,10 +1,14 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 
-client = TestClient(app)
+@pytest.fixture(scope="session")
+def client():
+    with TestClient(app) as client:
+        yield client
 
-def test_predict_success():
+def test_predict_success(client):
     response = client.post(
         "/predict",
         json={
@@ -24,7 +28,7 @@ def test_predict_success():
     assert isinstance(body["predicted_sales"], int)
 
 
-def test_store_not_found():
+def test_store_not_found(client):
     response = client.post(
         "/predict",
         json={
@@ -43,7 +47,7 @@ def test_store_not_found():
     }
 
 
-def test_invalid_schema():
+def test_invalid_schema(client):
     response = client.post(
         "/predict",
         json={
@@ -58,7 +62,7 @@ def test_invalid_schema():
     assert response.status_code == 422
 
 
-def test_bool_coercion():
+def test_bool_coercion(client):
     response = client.post(
         "/predict",
         json={
