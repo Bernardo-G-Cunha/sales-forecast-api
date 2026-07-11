@@ -34,15 +34,10 @@ jobs:
           pip install -r requirements-dev.txt
           pip install -e .
 
-      - name: Show repository
+      - name: Set environment variables
         run: |
-          pwd
-          ls -la
-          find . -maxdepth 2 -type d
-
-      - name: Show Python path
-        run: |
-          python -c "import sys; print('\n'.join(sys.path))"
+          echo "S3_BUCKET=sales-forecast-api-artifacts-bernardo" >> $GITHUB_ENV
+          echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
             
       - name: Run tests
         run: pytest
