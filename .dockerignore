@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Virtual environment
+.venv
+
+# Python cache
+__pycache__/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/
+
+# Tests
+tests/
+
+# Training artifacts and utils
+models/
+ml_utils/
+
+# Training data
+data/processed/
+
+# Raw training data (keep store.csv)
+data/raw/train.csv
+data/raw/test.csv
+
+# Misc
+*.log
+
+# Env variables
+.env
+
+# Documentation
+LICENSE
+README.md
+requirements-dev.txt
+
+# Docker
+.dockerignore
+Dockerfile
+
+sales_forecast_api.egg-info/
