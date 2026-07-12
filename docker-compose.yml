@@ -1,0 +1,16 @@
+services:
+  sales-api:
+    image: 784038766309.dkr.ecr.us-east-1.amazonaws.com/portfolio/sales-forecast-api:latest
+
+    container_name: sales-api
+
+    restart: unless-stopped
+
+    ports:
+      - "80:8000"
+
+    environment:
+      S3_BUCKET: sales-forecast-api-artifacts-bernardo
+    
+    volumes:
+      - ~/.aws:/root/.aws:ro
