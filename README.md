@@ -18,6 +18,8 @@ The application exposes a REST API built with FastAPI that receives store inform
 
 Instead of packaging the trained model inside the Docker image, ML artifacts are stored separately in Amazon S3 and downloaded automatically during application startup. This keeps the application image lightweight while allowing independent model updates.
 
+**Note on scope:** the goal of this project is not to produce the most accurate forecasting model possible, but to build a complete (or near-complete) system spanning training, packaging, testing, deployment, and infrastructure — the kind of end-to-end pipeline a sales forecasting model would actually need to run in production. The Random Forest model was deliberately kept simple and lightweight so the engineering side of the project could be the focus.
+
 ---
 
 # Features
@@ -50,6 +52,9 @@ Instead of packaging the trained model inside the Docker image, ML artifacts are
                                 │
                                 ▼
                          Push Image to ECR
+                                │
+                                ▼
+                  Upload docker-compose.yml to S3
                                 │
                                 ▼
                        Deploy to EC2 (SSM)
@@ -172,7 +177,7 @@ Example response:
 
 ```json
 {
-  "predicted_sales": 5263
+  "predicted_sales": 6036
 }
 ```
 
@@ -241,7 +246,8 @@ On every push to the `main` branch, the workflow:
 4. Executes automated tests
 5. Builds the Docker image
 6. Pushes the image to Amazon ECR
-7. Deploys the updated application to Amazon EC2
+7. Uploads the updated `docker-compose.yml` to Amazon S3
+8. Triggers deployment on EC2 via AWS Systems Manager (SSM Run Command), which pulls the new image, recreates the container, and prunes old images
 
 ---
 
@@ -268,6 +274,7 @@ Some architectural decisions were made to better reflect production environments
 * Artifacts are downloaded during application startup.
 * CI/CD uses GitHub Actions with OpenID Connect authentication.
 * Docker Compose manages the production container.
+* No `git clone` or SSH access on the EC2 instance — the `docker-compose.yml` is treated as a deployment artifact and distributed via S3, following the same pattern used for ML artifacts. All instance access is via AWS Systems Manager, with no open SSH port and no long-lived credentials.
 
 ---
 
