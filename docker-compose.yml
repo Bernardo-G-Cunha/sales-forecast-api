@@ -11,6 +11,3 @@ services:
 
     environment:
       S3_BUCKET: sales-forecast-api-artifacts-bernardo
-    
-    volumes:
-      - ~/.aws:/root/.aws:ro
