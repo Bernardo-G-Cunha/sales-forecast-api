@@ -12,13 +12,11 @@ A production-oriented Machine Learning API that predicts daily store sales using
 
 # Overview
 
-This project was designed to simulate a real-world Machine Learning service rather than a notebook-based experiment.
+This project was designed to simulate a real-world Machine Learning service rather than a notebook-based experiment. The focus is less on squeezing out maximum predictive accuracy and more on building the full pipeline a model like this would actually need to reach production: training, packaging, testing, CI/CD, and cloud infrastructure. The Random Forest model itself was deliberately kept small and simple, so the engineering side of the project could take center stage.
 
 The application exposes a REST API built with FastAPI that receives store information and predicts daily sales using a pre-trained Scikit-Learn pipeline.
 
 Instead of packaging the trained model inside the Docker image, ML artifacts are stored separately in Amazon S3 and downloaded automatically during application startup. This keeps the application image lightweight while allowing independent model updates.
-
-**Note on scope:** the goal of this project is not to produce the most accurate forecasting model possible, but to build a complete (or near-complete) system spanning training, packaging, testing, deployment, and infrastructure — the kind of end-to-end pipeline a sales forecasting model would actually need to run in production. The Random Forest model was deliberately kept simple and lightweight so the engineering side of the project could be the focus.
 
 ---
 
@@ -157,20 +155,18 @@ Model artifacts are downloaded from Amazon S3 during application startup.
 
 # API
 
+**Live demo:** `http://3.220.32.87`
+
 ## Predict sales
 
 **POST** `/predict`
 
 Example request:
 
-```json
-{
-  "store": 1,
-  "date": "2015-07-31",
-  "promo": true,
-  "state_holiday": "0",
-  "school_holiday": false
-}
+```bash
+curl -X POST http://3.220.32.87/predict \
+  -H "Content-Type: application/json" \
+  -d '{"store": 1, "date": "2015-07-31", "promo": true, "state_holiday": "0", "school_holiday": false}'
 ```
 
 Example response:
