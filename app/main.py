@@ -6,7 +6,6 @@ from app.handlers import register_exception_handlers
 from app.services import ArtifactService
 from app.core import logging_config, load_pipeline, load_stores
 from common import MODEL_DIR, RAW_DATA_DIR
-from app.core.artifacts import load_pipeline, load_stores
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
