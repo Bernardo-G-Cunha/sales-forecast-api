@@ -155,7 +155,7 @@ Model artifacts are downloaded from Amazon S3 during application startup.
 
 # API
 
-**Live demo:** `http://3.220.32.87`
+**Live demo:** `http://salesapi.bernardo-cunha.com`
 
 ## Predict sales
 
@@ -164,7 +164,7 @@ Model artifacts are downloaded from Amazon S3 during application startup.
 Example request:
 
 ```bash
-curl -X POST http://3.220.32.87/predict \
+curl -X POST http://salesapi.bernardo-cunha.com/predict \
   -H "Content-Type: application/json" \
   -d '{"store": 1, "date": "2015-07-31", "promo": true, "state_holiday": "0", "school_holiday": false}'
 ```
@@ -277,7 +277,6 @@ Some architectural decisions were made to better reflect production environments
 # Future Improvements
 
 * HTTPS with Nginx and Let's Encrypt
-* Custom domain
 * Blue/Green deployments
 * Monitoring and metrics
 * Model versioning
