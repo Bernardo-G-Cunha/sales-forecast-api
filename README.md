@@ -1,128 +1,25 @@
 # Sales Forecast API
 
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green.svg)](https://fastapi.tiangolo.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-green.svg)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED.svg)](https://www.docker.com/)
 [![AWS](https://img.shields.io/badge/AWS-EC2%20%7C%20ECR%20%7C%20S3-orange.svg)](https://aws.amazon.com/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF.svg)](https://github.com/features/actions)
 
-A production-oriented Machine Learning API that predicts daily store sales using a Random Forest model. The project demonstrates an end-to-end ML workflow, including model training, API development, containerization, automated CI/CD, and deployment on AWS.
+A production-oriented Machine Learning API that predicts daily store sales using a Random Forest model.
+
+The project demonstrates an end-to-end ML deployment workflow, including model training, API development, Docker containerization, CI/CD automation, and AWS deployment.
 
 ---
 
 # Overview
 
-This project was designed to simulate a real-world Machine Learning service rather than a notebook-based experiment. The focus is less on squeezing out maximum predictive accuracy and more on building the full pipeline a model like this would actually need to reach production: training, packaging, testing, CI/CD, and cloud infrastructure. The Random Forest model itself was deliberately kept small and simple, so the engineering side of the project could take center stage.
+The application provides a REST API built with FastAPI that receives store information and predicts daily sales using a pre-trained Scikit-Learn pipeline.
 
-The application exposes a REST API built with FastAPI that receives store information and predicts daily sales using a pre-trained Scikit-Learn pipeline.
+ML artifacts are managed separately from the application code. In production, they are stored in Amazon S3 and downloaded during application startup, keeping the Docker image lightweight and allowing independent model updates.
 
-Instead of packaging the trained model inside the Docker image, ML artifacts are stored separately in Amazon S3 and downloaded automatically during application startup. This keeps the application image lightweight while allowing independent model updates.
+For local execution, the trained model artifact is available through the GitHub Release assets. The model file is not stored in the repository due to its size, while smaller supporting files such as `store.csv` remain versioned with the source code.
 
----
-
-# Features
-
-* REST API built with FastAPI
-* Random Forest regression model
-* Automatic artifact download from Amazon S3
-* Docker containerization
-* Docker Compose support
-* Automated CI/CD with GitHub Actions
-* Amazon ECR image publishing
-* AWS EC2 deployment
-* IAM Roles (no AWS Access Keys required)
-* Automated testing with Pytest
-
----
-
-# Architecture
-
-```text
-                 GitHub
-                    │
-                    ▼
-            GitHub Actions
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-        ▼                       ▼
-   Run Tests              Build Docker Image
-                                │
-                                ▼
-                         Push Image to ECR
-                                │
-                                ▼
-                  Upload docker-compose.yml to S3
-                                │
-                                ▼
-                       Deploy to EC2 (SSM)
-                                │
-                                ▼
-                         Docker Compose
-                                │
-                                ▼
-                           FastAPI Service
-                                │
-                Downloads artifacts from S3
-                                │
-                                ▼
-                    Random Forest Pipeline
-```
-
----
-
-# Machine Learning
-
-The prediction model is implemented using Scikit-Learn.
-
-Model:
-
-* RandomForestRegressor
-
-Artifacts:
-
-* `sales_forecast_pipeline.joblib`
-* `store.csv`
-
-To improve deployment on low-resource instances (`t3.micro`), the model was optimized by reducing its size while maintaining similar predictive performance.
-
-The Docker image contains only the application code.
-
-Model artifacts are downloaded from Amazon S3 during application startup.
-
----
-
-# Tech Stack
-
-## Backend
-
-* Python
-* FastAPI
-* Pydantic
-
-## Machine Learning
-
-* Scikit-Learn
-* Pandas
-* NumPy
-
-## DevOps
-
-* Docker
-* Docker Compose
-* GitHub Actions
-
-## Cloud
-
-* Amazon EC2
-* Amazon ECR
-* Amazon S3
-* AWS IAM
-* AWS Systems Manager (SSM)
-
-## Testing
-
-* Pytest
 
 ---
 
@@ -144,6 +41,9 @@ Model artifacts are downloaded from Amazon S3 during application startup.
 ├── tests/
 ├── notebooks/
 ├── ml_utils/
+├── nginx/
+│   ├── nginx.conf
+│   └── Dockerfile
 ├── common/
 ├── Dockerfile
 ├── docker-compose.yml
@@ -153,23 +53,160 @@ Model artifacts are downloaded from Amazon S3 during application startup.
 
 ---
 
+# Features
+
+* FastAPI REST API
+* Random Forest regression model
+* ML artifact management with Amazon S3
+* Docker containerization
+* Nginx reverse proxy
+* HTTPS with Let's Encrypt
+* GitHub Actions CI/CD pipeline
+* Amazon ECR image registry
+* AWS EC2 deployment
+* AWS Systems Manager deployment
+* IAM Role authentication
+* Automated tests with Pytest
+* Health check endpoint
+
+---
+
+# Architecture
+
+```text
+GitHub
+  |
+  v
+GitHub Actions
+  |
+  +--> Tests
+  |
+  +--> Docker Build
+          |
+          v
+       Amazon ECR
+          |
+          v
+     Deploy via SSM
+          |
+          v
+    EC2 + Docker Compose
+          |
+          +------------+
+          |            |
+          v            v
+       Nginx        FastAPI
+        HTTPS          |
+                       v
+                    Amazon S3
+                (ML artifacts)
+```
+
+Request flow:
+
+```text
+Client
+  |
+ HTTPS
+  |
+Nginx
+  |
+ HTTP (internal)
+  |
+FastAPI
+```
+
+---
+
+# Machine Learning
+
+Model:
+
+* RandomForestRegressor
+
+Artifacts:
+
+* `sales_forecast_pipeline.joblib` (distributed through GitHub Release assets)
+* `store.csv` (versioned with the repository)
+
+The model was optimized to run on a low-resource EC2 instance while maintaining similar predictive performance.
+
+For production deployment, artifacts are stored in Amazon S3 and downloaded automatically by the application.
+
+For local execution, download `sales_forecast_pipeline.joblib` from the latest GitHub Release and place it in the expected directory. The `store.csv` file is already included in the repository.
+
+---
+
+# Tech Stack
+
+## Backend
+
+* Python
+* FastAPI
+* Pydantic
+
+## Machine Learning
+
+* Scikit-Learn
+* Pandas
+* NumPy
+
+## DevOps
+
+* Docker
+* Docker Compose
+* Nginx
+* GitHub Actions
+
+## Cloud
+
+* Amazon EC2
+* Amazon ECR
+* Amazon S3
+* AWS IAM
+* AWS Systems Manager
+
+---
+
 # API
 
-**Live demo:** `http://salesapi.bernardo-cunha.com`
+Live demo:
 
-## Predict sales
+https://salesapi.bernardo-cunha.com
 
-**POST** `/predict`
+Documentation:
 
-Example request:
+https://salesapi.bernardo-cunha.com/docs
+
+## Health Check
+
+```
+GET /health
+```
+
+Response:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+## Predict Sales
+
+```
+POST /predict
+```
+
+Example:
 
 ```bash
-curl -X POST http://salesapi.bernardo-cunha.com/predict \
+curl -X POST https://salesapi.bernardo-cunha.com/predict \
   -H "Content-Type: application/json" \
   -d '{"store": 1, "date": "2015-07-31", "promo": true, "state_holiday": "0", "school_holiday": false}'
 ```
 
-Example response:
+Response:
 
 ```json
 {
@@ -181,20 +218,30 @@ Example response:
 
 # Running Locally
 
-Create a virtual environment:
+Install dependencies:
 
 ```bash
 python -m venv .venv
-```
 
-Activate it and install dependencies:
-
-```bash
 pip install -r requirements-dev.txt
 pip install -e .
 ```
 
-Run the API:
+Download the trained model artifact from the latest GitHub Release:
+
+```
+sales_forecast_pipeline.joblib
+```
+
+Place it in the directory expected by the application.
+
+```
+models/sales_forecast_pipeline.joblib
+```
+
+The `store.csv` file is already available after cloning the repository.
+
+Run:
 
 ```bash
 uvicorn app.main:app --reload
@@ -204,13 +251,13 @@ uvicorn app.main:app --reload
 
 # Running with Docker
 
-Build the image:
+Build:
 
 ```bash
 docker build -t sales-forecast-api .
 ```
 
-Run with Docker Compose:
+Run:
 
 ```bash
 docker compose up -d
@@ -218,73 +265,22 @@ docker compose up -d
 
 ---
 
-# AWS Deployment
+# CI/CD Pipeline
 
-The application is deployed using the following AWS services:
+On every push to `main`:
 
-* Amazon S3 stores ML artifacts
-* Amazon ECR stores Docker images
-* Amazon EC2 hosts the application
-* IAM Roles provide secure AWS authentication
-* Systems Manager (SSM) enables remote deployment without SSH keys
+1. Run automated tests
+2. Build Docker images
+3. Push images to Amazon ECR
+4. Upload deployment configuration to Amazon S3
+5. Deploy to EC2 using AWS Systems Manager
+6. Restart containers with Docker Compose
 
----
+Authentication uses GitHub Actions OIDC with AWS IAM Roles, avoiding long-lived AWS credentials.
 
-# CI/CD
-
-The deployment pipeline is implemented with GitHub Actions.
-
-On every push to the `main` branch, the workflow:
-
-1. Checks out the repository
-2. Assumes an AWS IAM Role using OpenID Connect (OIDC)
-3. Installs project dependencies
-4. Executes automated tests
-5. Builds the Docker image
-6. Pushes the image to Amazon ECR
-7. Uploads the updated `docker-compose.yml` to Amazon S3
-8. Triggers deployment on EC2 via AWS Systems Manager (SSM Run Command), which pulls the new image, recreates the container, and prunes old images
-
----
-
-# Testing
-
-The project includes automated API tests using Pytest.
-
-Tests validate:
-
-* Successful predictions
-* Invalid payload handling
-* Missing store detection
-* Request schema validation
-
----
-
-# Design Decisions
-
-Some architectural decisions were made to better reflect production environments:
-
-* ML artifacts are separated from the application image.
-* IAM Roles are used instead of AWS Access Keys.
-* Docker images remain independent from trained models.
-* Artifacts are downloaded during application startup.
-* CI/CD uses GitHub Actions with OpenID Connect authentication.
-* Docker Compose manages the production container.
-* No `git clone` or SSH access on the EC2 instance — the `docker-compose.yml` is treated as a deployment artifact and distributed via S3, following the same pattern used for ML artifacts. All instance access is via AWS Systems Manager, with no open SSH port and no long-lived credentials.
-
----
-
-# Future Improvements
-
-* HTTPS with Nginx and Let's Encrypt
-* Blue/Green deployments
-* Monitoring and metrics
-* Model versioning
-* Automated retraining pipeline
-* Infrastructure as Code (Terraform)
 
 ---
 
 # License
 
-This project is available under the MIT License.
+MIT License
