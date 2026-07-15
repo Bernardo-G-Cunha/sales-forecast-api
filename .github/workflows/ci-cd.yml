@@ -8,7 +8,7 @@ on:
       - '**.md'
       - 'DEPLOYMENT.md'
       - 'README.md'
-      
+
 permissions:
   id-token: write
   contents: read
@@ -17,7 +17,9 @@ env:
   AWS_REGION: us-east-1
   AWS_ACCOUNT_ID: 784038766309
   S3_BUCKET: sales-forecast-api-artifacts-bernardo
-  ECR_REPOSITORY: portfolio/sales-forecast-api
+
+  API_REPOSITORY: portfolio/sales-forecast-api
+  NGINX_REPOSITORY: portfolio/nginx
 
 jobs:
   pipeline:
@@ -47,23 +49,42 @@ jobs:
       - name: Run tests
         run: pytest
 
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ env.ECR_REPOSITORY }} .
-
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Tag Docker image
+      - name: Build API image
+        run: |
+          docker build \
+            -t ${{ env.API_REPOSITORY }} \
+            .
+
+      - name: Build Nginx image
+        run: |
+          docker build \
+            -t ${{ env.NGINX_REPOSITORY }} \
+            ./nginx
+
+      - name: Tag API image
         run: |
           docker tag \
-            ${{ env.ECR_REPOSITORY }} \
-            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
-      
-      - name: Push Docker image
+            ${{ env.API_REPOSITORY }} \
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.API_REPOSITORY }}:latest
+
+      - name: Tag Nginx image
+        run: |
+          docker tag \
+            ${{ env.NGINX_REPOSITORY }} \
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.NGINX_REPOSITORY }}:latest
+
+      - name: Push API image
         run: |
           docker push \
-            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.API_REPOSITORY }}:latest
+
+      - name: Push Nginx image
+        run: |
+          docker push \
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.NGINX_REPOSITORY }}:latest
 
       - name: Upload docker-compose.yml to S3
         run: |
@@ -87,6 +108,7 @@ jobs:
             ]' \
             --query "Command.CommandId" \
             --output text)
+
           echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
 
       - name: Wait for deployment result
