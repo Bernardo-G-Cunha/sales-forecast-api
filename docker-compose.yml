@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: 784038766309.dkr.ecr.us-east-1.amazonaws.com/portfolio/nginx:latest
+    image: 784038766309.dkr.ecr.us-east-1.amazonaws.com/portfolio/sales-forecast-nginx:latest
 
     container_name: nginx
 
