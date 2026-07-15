@@ -19,7 +19,7 @@ env:
   S3_BUCKET: sales-forecast-api-artifacts-bernardo
 
   API_REPOSITORY: portfolio/sales-forecast-api
-  NGINX_REPOSITORY: portfolio/nginx
+  NGINX_REPOSITORY: portfolio/sales-forecast-nginx
 
 jobs:
   pipeline:
