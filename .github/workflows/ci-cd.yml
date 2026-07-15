@@ -102,7 +102,7 @@ jobs:
               "aws s3 cp s3://'"${{ env.S3_BUCKET }}"'/deploy/docker-compose.yml /home/ubuntu/app/docker-compose.yml",
               "aws ecr get-login-password --region '"${{ env.AWS_REGION }}"' | docker login --username AWS --password-stdin '"${{ env.AWS_ACCOUNT_ID }}"'.dkr.ecr.'"${{ env.AWS_REGION }}"'.amazonaws.com",
               "cd /home/ubuntu/app && docker compose pull",
-              "docker rm -f sales-api || true",
+              "docker rm -f sales-api nginx || true",
               "cd /home/ubuntu/app && docker compose up -d",
               "docker image prune -a -f"
             ]' \
@@ -112,6 +112,7 @@ jobs:
           echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
 
       - name: Wait for deployment result
+        if: always() && steps.deploy.outputs.command_id != ''
         run: |
           aws ssm wait command-executed \
             --command-id "${{ steps.deploy.outputs.command_id }}" \
