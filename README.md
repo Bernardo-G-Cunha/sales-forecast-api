@@ -27,6 +27,10 @@ For local execution, the trained model artifact is available through the GitHub 
 
 ```text
 .
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml
+│
 ├── app/
 │   ├── api/
 │   ├── core/
