@@ -6,6 +6,12 @@ from app.services import predict as predict_sales
 router = APIRouter()
 
 
+@router.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
+
 @router.post("/predict", response_model=PredictionResponse)
 def predict(request: PredictionRequest) -> PredictionResponse:
     prediction = predict_sales(request)
